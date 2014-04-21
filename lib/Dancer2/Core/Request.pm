@@ -13,7 +13,18 @@ use URI::Escape;
 use Dancer2::Core::Types;
 use Dancer2::Core::Request::Upload;
 
+use Plack::Request;
+
 with 'Dancer2::Core::Role::Headers';
+
+has plack_req => (
+    is      => 'ro',
+    isa     => InstanceOf['Plack::Request'],
+    lazy    => 1,
+    builder => '_build_plack_req',
+);
+
+sub _build_plack_req { Plack::Request->new( $_[0]->env ) }
 
 =head1 DESCRIPTION
 
@@ -82,6 +93,8 @@ supported:
 =cut
 
 =head1 EXTRA SPEED
+
+HTTP::Parser::XS
 
 Install URL::Encode::XS and CGI::Deurl::XS for extra speed.
 
@@ -410,12 +423,12 @@ sub agent                 { $_[0]->user_agent }
 sub remote_address        { $_[0]->address }
 sub forwarded_for_address { $_[0]->env->{'X_FORWARDED_FOR'} }
 sub address               { $_[0]->env->{REMOTE_ADDR} }
-sub remote_host           { $_[0]->env->{REMOTE_HOST} }
-sub protocol              { $_[0]->env->{SERVER_PROTOCOL} }
+sub remote_host           { $_[0]->plack_req->remote_host }
+sub protocol              { $_[0]->plack_req->protocol }
 sub port                  { $_[0]->env->{SERVER_PORT} }
-sub request_uri           { $_[0]->env->{REQUEST_URI} }
-sub user                  { $_[0]->env->{REMOTE_USER} }
-sub script_name           { $_[0]->env->{SCRIPT_NAME} }
+sub request_uri           { $_[0]->plack_req->request_uri }
+sub user                  { $_[0]->plack_req->user }
+sub script_name           { $_[0]->plack_req->script_name }
 
 =method scheme()
 
