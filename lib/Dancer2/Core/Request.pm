@@ -94,9 +94,17 @@ supported:
 
 =head1 EXTRA SPEED
 
-HTTP::Parser::XS
+Install the following modules for extra speed:
 
-Install URL::Encode::XS and CGI::Deurl::XS for extra speed.
+=over 4
+
+=item * L<URL::Encode::XS>
+
+=item * L<CGI::Deurl::XS>
+
+=item * L<HTTP::Parser::XS>
+
+=back
 
 Dancer2::Core::Request will use it if they detect their presence.
 
