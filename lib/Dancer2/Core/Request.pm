@@ -128,8 +128,6 @@ my @http_env_keys = (qw/
     accept_type
     connection
     keep_alive
-    referer
-    user_agent
     x_requested_with
 /);
 
@@ -141,6 +139,20 @@ foreach my $attr ( @http_env_keys ) {
         default => sub { $_[0]->env->{ 'HTTP_' . ( uc $attr ) } },
     );
 }
+
+has referer => (
+    is      => 'ro',
+    isa     => Maybe[Str],
+    lazy    => 1,
+    default => sub { $_[0]->plack_req->referer }
+);
+
+has user_agent => (
+    is      => 'ro',
+    isa     => Maybe[Str],
+    lazy    => 1,
+    default => sub { $_[0]->plack_req->user_agent }
+);
 
 =method env()
 
