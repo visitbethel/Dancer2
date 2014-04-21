@@ -240,7 +240,7 @@ has content_type => (
     isa     => Str,
     lazy    => 1,
     default => sub {
-        $_[0]->env->{CONTENT_TYPE} || '';
+        $_[0]->plack_req->content_type || ''
     },
 );
 
@@ -255,7 +255,7 @@ has content_length => (
     isa     => Num,
     lazy    => 1,
     default => sub {
-        $_[0]->env->{CONTENT_LENGTH} || 0;
+        $_[0]->plack_req->content_length || 0
     },
 );
 
