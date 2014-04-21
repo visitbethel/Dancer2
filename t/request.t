@@ -96,9 +96,9 @@ sub run_test {
             env             => $env,
             is_behind_proxy => 1
         );
-        is $req->secure, 1;
-        is $req->host,   $env->{X_FORWARDED_HOST};
-        is $req->scheme, 'https';
+        is $req->secure, 1, 'is request secure?';
+        is $req->host,   $env->{X_FORWARDED_HOST}, 'correct host';
+        is $req->scheme, 'https', 'scheme is https';
     }
 
     note "testing path, dispatch_path and uri_base"; {
