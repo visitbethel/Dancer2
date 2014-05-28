@@ -237,10 +237,11 @@ has name => (
 );
 
 has request => (
-    is      => 'ro',
-    isa     => InstanceOf['Dancer2::Core::Request'],
-    writer  => 'set_request',
-    clearer => 'clear_request',
+    is        => 'ro',
+    isa       => InstanceOf['Dancer2::Core::Request'],
+    writer    => 'set_request',
+    clearer   => 'clear_request',
+    predicate => 'has_request',
 );
 
 # holds a context whenever a request is processed
@@ -421,10 +422,9 @@ sub _init_hooks {
 sub _init_for_context {
     my ($self) = @_;
 
-    return if !defined $self->context;
-    return if !defined $self->context->request;
+    $self->has_request or return;
 
-    $self->context->request->is_behind_proxy(1)
+    $self->request->is_behind_proxy(1)
       if $self->setting('behind_proxy');
 }
 
@@ -494,9 +494,9 @@ sub session {
 
 sub template {
     my ($self) = shift;
-    my $template = $self->template_engine;
 
-    my $content = $template->process(@_);
+    my $template = $self->template_engine;
+    my $content  = $template->process( $self->request, @_ );
 
     return $content;
 }
@@ -599,7 +599,7 @@ sub send_file {
         }
     }
 
-    $self->context->request->path_info($path);
+    $self->request->path_info($path);
     return $file_handler->code->( $self->context, $self->prefix );
 
     # TODO Streaming support
