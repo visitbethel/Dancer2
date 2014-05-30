@@ -8,7 +8,6 @@ use Carp 'croak';
 
 use Dancer2::Core::Types;
 use Dancer2::Core::Request;
-use Dancer2::Core::Response;
 
 =attr app
 
@@ -37,19 +36,6 @@ has request => (
     isa     => InstanceOf ['Dancer2::Core::Request'],
     lazy    => 1,
 );
-
-
-=attr response
-
-A L<Dancer2::Core::Response> object, used to set content, headers and HTTP status codes.
-
-=cut
-
-sub response {
-    my $self = shift;
-    if (@_) { $self->app->set_response(@_) }
-    return $self->app->response;
-}
 
 
 =attr session
