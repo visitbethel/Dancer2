@@ -86,7 +86,7 @@ sub dispatch {
             # No further processing of this response if its halted
             if ( $response->is_halted ) {
                 $app->context(undef);
-                app_cleanup($app);
+                $self->app_cleanup($app);
                 return $response;
             }
 
@@ -114,7 +114,8 @@ sub dispatch {
 }
 
 sub app_cleanup {
-    my $app = shift;
+    my $self = shift;
+    my $app  = shift;
 
     $app->clear_response;
     $app->clear_request;
