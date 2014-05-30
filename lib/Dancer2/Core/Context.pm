@@ -52,22 +52,6 @@ sub response {
 }
 
 
-=method halt
-
-Flag the response object as 'halted'.
-
-If called during request dispatch, immediatly returns the response
-to the dispatcher and after hooks will not be run.
-
-=cut
-
-sub halt {
-   my ($self) = @_;
-   $self->response->halt;
-   # Short citcuit any remaining hook/route code
-   $self->app->with_return->($self->response) if $self->app->has_with_return;
-}
-
 =attr session
 
 Handle for the current session object, if any
