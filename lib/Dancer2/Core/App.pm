@@ -619,7 +619,7 @@ sub send_file {
     }
 
     $self->request->path_info($path);
-    return $file_handler->code->( $self->context, $self->prefix );
+    return $file_handler->code->( $self, $self->prefix );
 
     # TODO Streaming support
 }
@@ -720,7 +720,7 @@ sub add_route {
     my ( $self, %route_attrs ) = @_;
 
     my $route =
-      Dancer2::Core::Route->new( %route_attrs, prefix => $self->prefix, );
+      Dancer2::Core::Route->new( %route_attrs, prefix => $self->prefix );
 
     my $method = $route->method;
 

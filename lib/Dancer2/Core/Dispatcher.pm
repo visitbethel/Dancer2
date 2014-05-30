@@ -77,7 +77,7 @@ sub dispatch {
                 $app->has_with_return
                     or $app->with_return($return);
 
-                return $self->_dispatch_route($route, $context);
+                return $self->_dispatch_route($route, $context, $app);
             };
 
             # Ensure we clear the with_return handler
@@ -150,10 +150,9 @@ sub build_request {
 
 # Call any before hooks then the matched route.
 sub _dispatch_route {
-    my ($self, $route, $context) = @_;
-    my $app = $context->app;
+    my ($self, $route, $context, $app) = @_;
 
-    $app->execute_hook( 'core.app.before_request', $context );
+    $app->execute_hook( 'core.app.before_request', $app );
     my $response = $context->response;
 
     my $content;
@@ -162,12 +161,11 @@ sub _dispatch_route {
         $content = $response->content;
     }
     else {
-        $content = eval { $route->execute($context) };
+        $content = eval { $route->execute($app) };
         my $error = $@;
         if ($error) {
             $app->log( error => "Route exception: $error" );
-            $app->execute_hook(
-                'core.app.route_exception', $context, $error);
+            $app->execute_hook( 'core.app.route_exception', $app, $error );
             return $self->response_internal_error( $app, $error );
         }
     }
