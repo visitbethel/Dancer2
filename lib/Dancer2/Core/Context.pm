@@ -7,7 +7,6 @@ use URI::Escape;
 use Carp 'croak';
 
 use Dancer2::Core::Types;
-use Dancer2::Core::Request;
 
 =attr app
 
@@ -21,20 +20,6 @@ has app => (
     isa       => InstanceOf ['Dancer2::Core::App'],
     weak_ref  => 1,
     predicate => 1,
-);
-
-
-=attr request
-
-A L<Dancer2::Core::Request> object, built from the PSGI environment variable for this request.
-
-=cut
-
-# the incoming request
-has request => (
-    is      => 'rw',
-    isa     => InstanceOf ['Dancer2::Core::Request'],
-    lazy    => 1,
 );
 
 

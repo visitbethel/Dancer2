@@ -66,9 +66,6 @@ sub dispatch {
             $request->_set_route_params($match);
             $app->set_request($request);
 
-            # FIXME: SHIM, to remove when Context.pm is removed
-            $context->request($request);
-
             my $response = with_return {
                 my ($return) = @_;
 
@@ -219,7 +216,6 @@ sub response_not_found {
     my $request = $self->build_request( $env, $not_found_app );
     $not_found_app->set_request($request);
 
-    $context->request($request);
     $context->app($not_found_app);
     $not_found_app->context($context);
 
