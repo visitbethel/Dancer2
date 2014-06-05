@@ -308,7 +308,7 @@ sub pass         { shift->response->pass }
 # Route handler helpers
 #
 
-sub context { shift->app->context }
+sub context { shift->app }
 
 sub request { shift->app->request }
 
