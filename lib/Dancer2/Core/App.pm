@@ -692,7 +692,7 @@ sub send_file {
         }
     }
 
-    $self->request->path_info($path);
+    $self->request->set_path_info($path);
     return $file_handler->code->( $self, $self->prefix );
 
     # TODO Streaming support
