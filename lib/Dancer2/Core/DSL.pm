@@ -130,7 +130,35 @@ sub set { shift->setting(@_) }
 
 sub template { shift->app->template(@_) }
 
-sub session { shift->app->session(@_) }
+sub session {
+    my ( $self, $key, $value ) = @_;
+
+    # shortcut reads if no session exists, so we don't
+    # instantiate sessions for no reason
+    if ( @_ == 2 ) {
+        return unless $self->app->has_session;
+    }
+
+    my $session = $self->app->session
+        || croak "No session available, a session engine needs to be set";
+
+    $self->app->setup_session;
+
+    # return the session object if no key
+    @_ == 1 and return $session;
+
+    # read if a key is provided
+    @_ == 2 and return $session->read($key);
+
+
+    # write to the session or delete if value is undef
+    if ( defined $value ) {
+        $session->write( $key => $value );
+    }
+    else {
+        $session->delete($key);
+    }
+}
 
 sub send_file { shift->app->send_file(@_) }
 
@@ -151,7 +179,7 @@ sub prefix {
       : $app->lexical_prefix(@_);
 }
 
-sub halt { shift->context->halt }
+sub halt { shift->app->halt }
 
 sub _route_parameters {
     my ( $regexp, $code, $options );
@@ -280,11 +308,14 @@ sub pass         { shift->context->pass }
 # Route handler helpers
 #
 
-sub context { shift->app->context }
+sub context {
+    carp "DEPRECATED: please use the 'app' keyword instead of 'context'";
+    shift->app;
+}
 
-sub request { shift->context->request }
+sub request { shift->app->request }
 
-sub response { shift->context->response }
+sub response { shift->app->response }
 
 sub upload { shift->request->upload(@_) }
 
@@ -298,17 +329,15 @@ sub params { shift->request->params(@_) }
 
 sub param { shift->request->param(@_) }
 
-sub redirect { shift->context->redirect(@_) }
+sub redirect { shift->app->redirect(@_) }
 
-sub forward {
-    my $self = shift;
-    $self->request->forward($self->context, @_);
-}
+sub forward { shift->app->forward(@_) }
 
-sub vars { shift->context->vars }
-sub var  { shift->context->var(@_) }
+sub vars { shift->request->vars }
+sub var  { shift->request->var(@_) }
 
-sub cookies { shift->context->cookies }
+sub cookies { shift->request->cookies }
+sub cookie { shift->app->cookie(@_) }
 
 sub mime {
     my $self = shift;
@@ -322,17 +351,15 @@ sub mime {
     }
 }
 
-sub cookie { shift->context->cookie(@_) }
-
 sub send_error {
     my ( $self, $message, $status ) = @_;
 
     my $serializer = $self->app->engine('serializer');
     my $x = Dancer2::Core::Error->new(
-        message => $message,
-        context => $self->context,
-        ( status => $status ) x !!$status,
-        ( serializer => $serializer ) x !!$serializer,
+          message    => $message,
+          app        => $self->app,
+        ( status     => $status     )x!! $status,
+        ( serializer => $serializer )x!! $serializer,
     )->throw;
 
     # return if there is a with_return coderef
