@@ -384,14 +384,28 @@ sub _init_hooks {
                 # session, first flush the session so cookie-based sessions can
                 # update the session ID if needed, then set the session cookie
                 # in the response
+                #
+                # if there is NO session object but the request has a cookie with
+                # a session key, create a dummy session with the same ID (without
+                # actually retrieving and flushing immediately) and generate the
+                # cookie header from the dummy session. Lazy Sessions FTW!
 
-                if ( $self->context->has_session ) {
+                if ( $self->context->_has_session ) {
                     my $session = $self->context->session;
                     $engine->flush( session => $session )
                       if $session->is_dirty;
                     $engine->set_cookie_header(
                         response => $response,
                         session  => $session
+                    );
+                }
+                elsif ( $self->context->has_session ) {
+                    my $cookie = $self->context->cookie( $engine->cookie_name );
+                    my $session_id = $cookie->value;
+                    my $dummy_session = Dancer2::Core::Session->new( id => $session_id );
+                    $engine->set_cookie_header(
+                        response => $response,
+                        session  => $dummy_session
                     );
                 }
                 elsif ( $self->context->has_destroyed_session ) {
