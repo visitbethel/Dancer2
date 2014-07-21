@@ -33,7 +33,7 @@ subtest 'halt within routes' => sub {
             my $res = $cb->( GET '/shortcircuit' );
             is( $res->code, 200, '[/shortcircuit] Correct status' );
             is( $res->content, 'halted', '[/shortcircuit] Correct content' );
-
+::p $res;
         }
 
         {
@@ -54,6 +54,7 @@ subtest 'halt within routes' => sub {
     };
 
 };
+__END__
 
 subtest 'halt in before hook' => sub {
     {

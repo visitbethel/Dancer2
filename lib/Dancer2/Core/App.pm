@@ -890,6 +890,11 @@ sub halt {
    $self->response->halt;
 
    # Short citcuit any remaining hook/route code
+    if ( $self->has_with_return ) {
+        print STDERR "***** printing response hashref *****\n";
+        use DDP; p $Dancer2::Core::Dispatcher::RESPONSE;
+    }
+
    $self->has_with_return
        and $self->with_return->($self->response);
 }

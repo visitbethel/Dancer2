@@ -297,11 +297,56 @@ sub dance { shift->start(@_) }
 # Response alterations
 #
 
-sub status       { shift->response->status(@_) }
-sub push_header  { shift->response->push_header(@_) }
-sub header       { shift->response->header(@_) }
-sub headers      { shift->response->header(@_) }
-sub content_type { shift->response->content_type(@_) }
+sub status       {
+    $Dancer2::Core::Dispatcher::RESPONSE->{'status'} = $_[1];
+    shift->response->status(@_);
+}
+
+sub push_header  {
+    $Dancer::Core::Dispatcher::RESPONSE->{'headers'}->push_header(
+        $_[1] => @_[ 2 .. $#_ ]
+    );
+
+    shift->response->push_header(@_);
+}
+
+sub header       {
+    use DDP;
+    print STDERR "About to call 'headers' on this object: ";
+    my@c=caller;
+    #p $Dancer2::Core::Dispatcher::RESPONSE;
+    #p $Dancer2::Core::Dispatcher::RESPONSE->{'headers'};
+    if ( ! $Dancer::Core::Dispatcher::RESPONSE->{'headers'} ) {
+        p $Dancer::Core::Dispatcher::RESPONSE;
+        p @c;
+        die;
+    } else {
+        my $hdrs = $Dancer::Core::Dispatcher::RESPONSE->{'headers'};
+        print STDERR "Headers:\n";
+        p $hdrs;
+        $hdrs->can('headers')
+            or die "Can't call headers\n";
+        $Dancer::Core::Dispatcher::RESPONSE->{'headers'}->header(
+            $_[1] => @_[ 2 .. $#_ ]
+        );
+    }
+
+    shift->response->header(@_);
+}
+
+sub headers      {
+    #return $Dancer::Core::Dispatcher::RESPONSE->{'headers'};
+    shift->response->header(@_);
+}
+
+sub content_type {
+    $Dancer2::Core::Dispatcher::RESPONSE->{'headers'}->header(
+        'Content-Type' => Dancer2->runner->mime_type->name_or_type($_[1])
+    );
+
+    shift->response->content_type(@_);
+}
+
 sub pass         { shift->app->pass }
 
 #
@@ -315,7 +360,13 @@ sub context {
 
 sub request { shift->app->request }
 
-sub response { shift->app->response }
+sub response {
+    # create response object on the fly
+    #return Dancer2::Core::Response->new(
+    #    $Dancer2::Core::Dispatcher::RESPONSE
+    #);
+    shift->app->response;
+}
 
 sub upload { shift->request->upload(@_) }
 

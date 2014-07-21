@@ -16,6 +16,9 @@ has apps => (
     default => sub { [] },
 );
 
+# this would be localized before used
+our $RESPONSE;
+
 # take the list of applications and an $env hash, return a Response object.
 sub dispatch {
     my ( $self, $env, $request, $curr_session ) = @_;
@@ -130,12 +133,19 @@ sub _dispatch_route {
     $app->execute_hook( 'core.app.before_request', $app );
     my $response = $app->response;
 
+use DDP;
+
     my $content;
     if ( $response->is_halted ) {
         # if halted, it comes from the 'before' hook. Take its content
         $content = $response->content;
     }
     else {
+        local $RESPONSE = { headers => HTTP::Headers->new };
+
+warn "*** Create response, request: ***\n";
+p $app->request;
+
         $content = eval { $route->execute($app) };
         my $error = $@;
         if ($error) {
@@ -143,8 +153,15 @@ sub _dispatch_route {
             $app->execute_hook( 'core.app.route_exception', $app, $error );
             return $self->response_internal_error( $app, $error );
         }
+
+        $RESPONSE->{'content'} = $content;
+
+        #$response = Dancer2::Core::Response->new($RESPONSE);
+        #p $response;
+
     }
 
+#p $RESPONSE;
     if ( ref $content eq 'Dancer2::Core::Response' ) {
         $response = $app->set_response($content);
     }
