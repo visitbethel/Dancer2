@@ -1,0 +1,25 @@
+# This is the main configuration file of your Dancer app
+# env-related settings should go to environments/$env.yml
+# all the settings in this file will be loaded at Dancer's startup.
+
+# Your application's name
+appname: "App"
+
+# The default layout to use for your application (located in
+# views/layouts/main.tt)
+#layout: "main"
+views: ./app
+
+template: "template_toolkit"
+    
+engines:
+  JSON:
+    allow_blessed:   '0'
+    canonical:       '1'
+    convert_blessed: '0'	
+  template_toolkit:
+    encoding:  'utf8'
+    start_tag: '[%'
+    end_tag:   '%]'
+    extension: 'html'
+    EVAL_PERL: '1'
