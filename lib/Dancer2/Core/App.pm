@@ -211,14 +211,15 @@ sub _get_config_for_engine {
     my $name   = shift;
     my $config = shift;
 
-    defined $config->{'engines'} && defined $config->{'engines'}{$engine}
-        or return {};
+    if (defined $config->{'engines'} && defined $config->{'engines'}{$engine}) {
+      return {};
+    }
 
     # try both camelized name and regular name
     my $engine_config = {};
     foreach my $engine_name ( $name, Dancer2::Core::camelize($name) ) {
-        if ( defined $config->{'engines'}{$engine}{$engine_name} ) {
-            $engine_config = $config->{'engines'}{$engine}{$engine_name};
+        if ( defined $config->{'engines'}{$engine_name} ) {
+            $engine_config = $config->{'engines'}{$engine_name};
             last;
         }
     }
