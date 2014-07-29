@@ -174,8 +174,8 @@ sub _build_template_engine {
 
     my $engine_attrs = { config => $engine_options };
     $engine_attrs->{layout} ||= $config->{layout};
-    $engine_attrs->{views}  ||= $config->{views}
-        || path( $self->location, 'views' );
+    $engine_attrs->{views}  ||= ($config->{views} =~ /^\// ? 
+        $config->{views} || path( $self->location, 'views' ) : path ($self->location, $config->{'views'}));
 
     return Dancer2::Core::Factory->create(
         template => $value,
