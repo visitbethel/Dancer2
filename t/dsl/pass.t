@@ -20,11 +20,14 @@ subtest 'pass within routes' => sub {
         get '/pass' => sub {
             return "the baton";
         };
+        get '/template_extension' => sub {
+          return engine('template')->default_tmpl_ext;
+        };
     }
 
     my $app = Dancer2->runner->psgi_app;
     is( ref $app, 'CODE', 'Got app' );
-
+    
     test_psgi $app, sub {
         my $cb = shift;
 
@@ -37,6 +40,9 @@ subtest 'pass within routes' => sub {
                 'pass',
                 '[/pass] Correct X-Pass header',
             );
+            my $res2 = $cb->( GET '/template_extension');
+            is( $res2->code, 200, '[/template_extension] Correct status' );
+            is( $res2->content, 'html', '[/template_extension] Correct content' );
         }
     };
 

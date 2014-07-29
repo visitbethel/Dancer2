@@ -38,6 +38,7 @@ use Test::More;
 
 ok(!defined &foo, 'intermediate package has no polluted namespace');
 
+
 package test3;
 use Test::More;
 use FindBin;
@@ -45,6 +46,21 @@ use File::Spec;
 
 BEGIN {
     $ENV{DANCER_CONFDIR} = File::Spec->catdir($FindBin::Bin, 'extend_config');
+}
+
+use Dancer2;
+
+ok(defined &foo, 'config specified DSL can foo');
+is(foo('baz'), 'baz', 'config specified Foo returns baz');
+
+
+package test4;
+use Test::More;
+use FindBin;
+use File::Spec;
+
+BEGIN {
+    $ENV{DANCER_CONFDIR} = File::Spec->catdir($FindBin::Bin, 'other_config');
 }
 
 use Dancer2;
