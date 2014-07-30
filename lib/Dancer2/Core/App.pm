@@ -4,7 +4,6 @@ package Dancer2::Core::App;
 use Moo;
 use Carp            qw/croak carp confess/;
 use Scalar::Util    'blessed';
-use Array::Utils    qw(:all);
 use Module::Runtime 'is_module_name';
 use File::Spec;
 
@@ -213,14 +212,6 @@ sub _get_config_for_engine {
     my $config = shift;
 
     unless (defined $config->{'engines'} and defined $config->{'engines'}{$engine}) {
-        if ($config->{'engines'}) {
-          my @supported_engines = @{$self->supported_engines};
-          my @configured_engines = keys %{$config->{'engines'}};
-          my @list = array_minus(@configured_engines, @supported_engines);
-          if (@list) {
-            carp "list of unsupported engines that are not configurable: ", join(", ", @list);
-          }
-        }      
         return {}; 
     }
         
