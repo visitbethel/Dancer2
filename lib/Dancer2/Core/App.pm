@@ -2,8 +2,9 @@
 package Dancer2::Core::App;
 
 use Moo;
-use Carp            'croak';
+use Carp            qw/croak carp confess/;
 use Scalar::Util    'blessed';
+use Array::Utils    qw(:all);
 use Module::Runtime 'is_module_name';
 use File::Spec;
 
@@ -77,6 +78,12 @@ has '+local_triggers' => (
             },
         };
 
+#        if ($config->{'engines'}) {
+#          #my @engine_configs = keys %{$config->{'engines'}};
+#          #my @list = map { grep { $_ }, @{$self->supported_engines} }, @engine_configs;
+#          #print "list of unsupported engines taht are configured", join(",", @list);
+#        }
+        
         foreach my $engine ( @{ $self->supported_engines } ) {
             $triggers->{$engine} = sub {
                 my $self   = shift;
@@ -211,20 +218,32 @@ sub _get_config_for_engine {
     my $name   = shift;
     my $config = shift;
 
-    if (defined $config->{'engines'} && defined $config->{'engines'}{$engine}) {
-      return {};
+    unless (defined $config->{'engines'} and defined $config->{'engines'}{$engine}) {
+        if ($config->{'engines'}) {
+          my @supported_engines = @{$self->supported_engines};
+          my @configured_engines = keys %{$config->{'engines'}};
+          my @list = array_minus(@configured_engines, @supported_engines);
+          if (@list) {
+            carp "list of unsupported engines that are not configurable: ", join(", ", @list);
+          }
+        }      
+        return {}; 
     }
-
+        
     # try both camelized name and regular name
     my $engine_config = {};
     foreach my $engine_name ( $name, Dancer2::Core::camelize($name) ) {
-        if ( defined $config->{'engines'}{$engine_name} ) {
-            $engine_config = $config->{'engines'}{$engine_name};
+        if ( defined $config->{'engines'}{$engine}{$engine_name} ) {
+            $engine_config = $config->{'engines'}{$engine}{$engine_name};
             last;
         }
     }
 
     return $engine_config;
+}
+
+sub _is_supported_engine {
+  my ($self, $engine, $config) = @_; 
 }
 
 has postponed_hooks => (
@@ -295,6 +314,7 @@ has session => (
 sub _build_response {
     my $self   = shift;
     my $engine = $self->engine('serializer');
+    croak "\t engine trouble?";
 
     return Dancer2::Core::Response->new(
         ( serializer => $engine )x!! $engine
@@ -605,6 +625,7 @@ sub engine {
     grep { $_ eq $name } @{ $self->supported_engines }
         or croak "Engine '$name' is not supported.";
 
+printf "%20s \n", $name;
     my $attr_name = "${name}_engine";
     return $self->$attr_name;
 }
@@ -638,6 +659,8 @@ sub hook_candidates {
 
     # TODO : get the list of all plugins registered
     my @plugins = @{ $self->plugins };
+    printf "\n\n\n\t[%20s] \n\n", \@engines;
+
 
     ( @route_handlers, @engines, @plugins );
 }
