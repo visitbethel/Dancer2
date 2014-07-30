@@ -78,12 +78,6 @@ has '+local_triggers' => (
             },
         };
 
-#        if ($config->{'engines'}) {
-#          #my @engine_configs = keys %{$config->{'engines'}};
-#          #my @list = map { grep { $_ }, @{$self->supported_engines} }, @engine_configs;
-#          #print "list of unsupported engines taht are configured", join(",", @list);
-#        }
-        
         foreach my $engine ( @{ $self->supported_engines } ) {
             $triggers->{$engine} = sub {
                 my $self   = shift;
