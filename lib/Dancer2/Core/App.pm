@@ -308,7 +308,6 @@ has session => (
 sub _build_response {
     my $self   = shift;
     my $engine = $self->engine('serializer');
-    croak "\t engine trouble?";
 
     return Dancer2::Core::Response->new(
         ( serializer => $engine )x!! $engine
@@ -619,7 +618,6 @@ sub engine {
     grep { $_ eq $name } @{ $self->supported_engines }
         or croak "Engine '$name' is not supported.";
 
-printf "%20s \n", $name;
     my $attr_name = "${name}_engine";
     return $self->$attr_name;
 }
@@ -653,7 +651,6 @@ sub hook_candidates {
 
     # TODO : get the list of all plugins registered
     my @plugins = @{ $self->plugins };
-    printf "\n\n\n\t[%20s] \n\n", \@engines;
 
 
     ( @route_handlers, @engines, @plugins );
